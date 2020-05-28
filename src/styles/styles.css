@@ -1,20 +1,30 @@
 @import '~normalize.css';
 @import 'roboto.css';
-
-*{
+* {
     background: lightcyan;
     font-size: 40px;
+    color: gray;
     text-decoration: dotted;
 }
-body{
+
+body {
     font-family: "Roboto", sans-serif;
 }
-h1{
+
+hr {
+    color: gray;
+    background-color: gray;
+    height: 2px;
+}
+
+h1 {
     text-align: center;
 }
 
-.logo{
+.logo {
     background-image: url(../assets/download.svg);
     background-size: cover;
-    height: 300px;width: 300px;margin: 0 auto;
+    height: 300px;
+    width: 300px;
+    margin: 0 auto;
 }
