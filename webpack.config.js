@@ -9,20 +9,37 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const isDev = process.env.NODE_ENV === 'development'
 const isProd = !isDev
 
+const cssLoaders = extra => {
+    const loaders = [
+        {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+                hmr: isDev,
+                reloadAll: true
+            }
+        },
+        'css-loader'
+    ]
+    if (extra) {
+        loaders.push(extra)
+    }
+    return loaders
+}
+
+const filename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`
+
 const optimization = () => {  //generate optimization objects
     const config = {
         splitChunks: {
             chunks: 'all'  //optimization code(no reply)
         }
     }
-
     if (isProd) {
         config.minimizer = [
             new OptimizeCssAssetsPlugin(),
             new TerserPlugin()
         ]
     }
-
     return config
 }
 
@@ -30,11 +47,11 @@ module.exports = {
     context: path.resolve(__dirname, 'src'),
     mode: 'development',
     entry: {
-        main: './index.js',
-        anal: './anal.js'
+        main: ['@babel/polyfill','./index.js'],
+        anal: './anal.ts'
     },
     output: {
-        filename: '[name].[contenthash].js',
+        filename: filename('js'),
         path: path.resolve(__dirname, 'dist')
     },
     resolve: {
@@ -49,6 +66,7 @@ module.exports = {
         port: 8800,
         hot: isDev
     },
+    devtool: isDev ? 'source-map' : '',
     plugins: [
         new HTMLWebpackPlugin({  //auto add tags with src
             template: './index.html',
@@ -66,23 +84,18 @@ module.exports = {
             ]
         }),
         new MiniCssExtractPlugin({
-            filename: '[name].[contenthash].css'
+            filename: filename('css')
         })
     ],
     module: {
         rules: [
             { //all imports with these extensions will be processed with this loaders
                 test: /\.css$/,
-                use: [
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                        options: {
-                            hmr: isDev,
-                            reloadAll: true
-                        }
-                    },
-                    'css-loader'
-                ]
+                use: cssLoaders()
+            },
+            {
+                test: /\.s[ac]ss$/, //regexp sass scss
+                use: cssLoaders('sass-loader')
             },
             {
                 test: /\.(png|svg|jpeg)$/,
@@ -91,6 +104,37 @@ module.exports = {
             {
                 test: /\.(ttf|woff)$/,
                 use: ['file-loader']
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: {
+                    loader:'babel-loader',
+                    options:{
+                        presets:[
+                            '@babel/preset-env'
+                        ],
+                        plugins: [
+                            '@babel/plugin-proposal-class-properties'
+                        ]
+                    }
+                }
+            },
+            {
+                test: /\.ts$/,
+                exclude: /node_modules/,
+                loader: {
+                    loader:'babel-loader',
+                    options:{
+                        presets:[
+                            '@babel/preset-env',
+                            '@babel/preset-typescript'
+                        ],
+                        plugins: [
+                            '@babel/plugin-proposal-class-properties'
+                        ]
+                    }
+                }
             }
         ]
     }
