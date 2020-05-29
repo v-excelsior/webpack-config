@@ -26,6 +26,17 @@ const cssLoaders = extra => {
     return loaders
 }
 
+const jsLoaders = () => {
+    const loaders = [{
+        loader: 'babel-loader',
+        options: babelOptions()
+    }]
+    if (isDev) {
+        loaders.push('eslint-loader')
+    }
+    return loaders
+}
+
 const filename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`
 
 const optimization = () => {  //generate optimization objects
@@ -43,11 +54,24 @@ const optimization = () => {  //generate optimization objects
     return config
 }
 
+const babelOptions = (preset) => {
+    const options = {
+        presets: [
+            '@babel/preset-env',
+        ],
+        plugins: [
+            '@babel/plugin-proposal-class-properties'
+        ]
+    }
+    if (preset) options.presets.push(preset)
+    return options
+}
+
 module.exports = {
     context: path.resolve(__dirname, 'src'),
     mode: 'development',
     entry: {
-        main: ['@babel/polyfill','./index.js'],
+        main: ['@babel/polyfill', './index.js'],
         anal: './anal.ts'
     },
     output: {
@@ -66,7 +90,7 @@ module.exports = {
         port: 8800,
         hot: isDev
     },
-    devtool: isDev ? 'source-map' : '',
+    devtool: isDev ? 'source-map' : '',  //add source map to bundle 
     plugins: [
         new HTMLWebpackPlugin({  //auto add tags with src
             template: './index.html',
@@ -108,32 +132,14 @@ module.exports = {
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
-                loader: {
-                    loader:'babel-loader',
-                    options:{
-                        presets:[
-                            '@babel/preset-env'
-                        ],
-                        plugins: [
-                            '@babel/plugin-proposal-class-properties'
-                        ]
-                    }
-                }
+                use: jsLoaders()
             },
             {
                 test: /\.ts$/,
                 exclude: /node_modules/,
                 loader: {
-                    loader:'babel-loader',
-                    options:{
-                        presets:[
-                            '@babel/preset-env',
-                            '@babel/preset-typescript'
-                        ],
-                        plugins: [
-                            '@babel/plugin-proposal-class-properties'
-                        ]
-                    }
+                    loader: 'babel-loader',
+                    options: babelOptions('@babel/preset-typescript')
                 }
             }
         ]

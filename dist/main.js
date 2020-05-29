@@ -245,6 +245,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var post = new _models_post__WEBPACK_IMPORTED_MODULE_0__["default"]('New post title', _assets_download__WEBPACK_IMPORTED_MODULE_4__["default"]);
 console.log('Post to string', post.toString());
+var unused = 42;
 
 /***/ }),
 
