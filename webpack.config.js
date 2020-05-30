@@ -5,6 +5,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const TerserPlugin = require('terser-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const isDev = process.env.NODE_ENV === 'development'
 const isProd = !isDev
@@ -42,7 +43,7 @@ const filename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`
 const optimization = () => {  //generate optimization objects
     const config = {
         splitChunks: {
-            chunks: 'all'  //optimization code(no reply)
+            chunks: 'all'  //optimization code(no reply), vendors is common between files
         }
     }
     if (isProd) {
@@ -65,6 +66,33 @@ const babelOptions = (preset) => {
     }
     if (preset) options.presets.push(preset)
     return options
+}
+
+const plugins = () => {
+    base =  [
+        new HTMLWebpackPlugin({  //auto add tags with src
+            template: './index.html',
+            minify: {
+                collapseWhitespace: isProd
+            }
+        }),
+        new CleanWebpackPlugin(),  //clean dist folder
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src/favicon.ico'),
+                    to: path.resolve(__dirname, 'dist')
+                }
+            ]
+        }),
+        new MiniCssExtractPlugin({
+            filename: filename('css')
+        })
+    ]
+    if (isProd) {
+       base.push(new BundleAnalyzerPlugin())
+    }
+    return base
 }
 
 module.exports = {
@@ -91,26 +119,7 @@ module.exports = {
         hot: isDev
     },
     devtool: isDev ? 'source-map' : '',  //add source map to bundle 
-    plugins: [
-        new HTMLWebpackPlugin({  //auto add tags with src
-            template: './index.html',
-            minify: {
-                collapseWhitespace: isProd
-            }
-        }),
-        new CleanWebpackPlugin(),  //clean dist folder
-        new CopyWebpackPlugin({
-            patterns: [
-                {
-                    from: path.resolve(__dirname, 'src/favicon.ico'),
-                    to: path.resolve(__dirname, 'dist')
-                }
-            ]
-        }),
-        new MiniCssExtractPlugin({
-            filename: filename('css')
-        })
-    ],
+    plugins: plugins(),
     module: {
         rules: [
             { //all imports with these extensions will be processed with this loaders
