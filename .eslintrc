@@ -1,13 +1,13 @@
 {
     "parser": "babel-eslint",
     "rules": {
-        "no-unused-vars": "warn"
+        "no-console": "warn",
+        "no-unused-vars": "warn",
+        "no-debugger": "error"
     },
-    "env":{
+    "env": {
         "es6": true,
         "browser": true
     },
-    "extends": [
-        "eslint:recommended"
-    ]
+    "extends": ["eslint:recommended"]
 }
