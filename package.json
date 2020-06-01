@@ -17,8 +17,9 @@
         "@babel/core": "^7.10.1",
         "@babel/plugin-proposal-class-properties": "^7.10.1",
         "@babel/polyfill": "^7.10.1",
-        "@babel/wset-env": "^7.10.1",
+        "@babel/preset-env": "^7.10.2",
         "@babel/preset-typescript": "^7.10.1",
+        "@babel/wset-env": "^7.10.1",
         "babel-eslint": "^10.1.0",
         "babel-loader": "^8.1.0",
         "clean-webpack-plugin": "^3.0.0",
@@ -34,6 +35,8 @@
         "sass-loader": "^8.0.2",
         "style-loader": "^1.2.1",
         "terser-webpack-plugin": "^3.0.2",
+        "vue-loader": "^15.9.2",
+        "vue-template-compiler": "^2.6.11",
         "webpack": "^4.43.0",
         "webpack-bundle-analyzer": "^3.8.0",
         "webpack-cli": "^3.3.11",
@@ -41,6 +44,7 @@
     },
     "dependencies": {
         "normalize.css": "^8.0.1",
-        "optimize-css-assets-webpack-plugin": "^5.0.3"
+        "optimize-css-assets-webpack-plugin": "^5.0.3",
+        "vue": "^2.6.11"
     }
 }

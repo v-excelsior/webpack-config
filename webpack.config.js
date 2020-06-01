@@ -7,6 +7,7 @@ const TerserPlugin = require('terser-webpack-plugin')
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
     .BundleAnalyzerPlugin
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 const isDev = process.env.NODE_ENV === 'development'
 const isProd = !isDev
@@ -15,13 +16,14 @@ const filename = (ext) => (isDev ? `[name].${ext}` : `[name].[hash].${ext}`)
 
 const cssLoaders = (extra) => {
     const loaders = [
-        {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-                hmr: isDev,
-                reloadAll: true,
-            },
-        },
+        // {
+        //     loader: MiniCssExtractPlugin.loader,
+        //     options: {
+        //         hmr: isDev,
+        //         reloadAll: true,
+        //     },
+        // },
+        'vue-style-loader',
         'css-loader',
     ]
     if (extra) {
@@ -86,6 +88,7 @@ const plugins = () => {
         new MiniCssExtractPlugin({
             filename: filename('css'),
         }),
+        new VueLoaderPlugin(),
     ]
     // on that when analizer needed after each build
     // if (isProd) {
@@ -151,6 +154,10 @@ module.exports = {
                     loader: 'babel-loader',
                     options: babelOptions('@babel/preset-typescript'),
                 },
+            },
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader',
             },
         ],
     },

@@ -17,8 +17,7 @@ function createAnal(): object {
                 return 'Anal destroyed'
             }
             return counter
-        }
-
+        },
     }
 }
 
