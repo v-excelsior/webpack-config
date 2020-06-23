@@ -12,18 +12,17 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const isDev = process.env.NODE_ENV === 'development'
 const isProd = !isDev
 
-const filename = (ext) => (isDev ? `[name].${ext}` : `[name].[hash].${ext}`)
+const filename = ext => (isDev ? `[name].${ext}` : `[name].[hash].${ext}`)
 
-const cssLoaders = (extra) => {
+const cssLoaders = extra => {
     const loaders = [
-        // {
-        //     loader: MiniCssExtractPlugin.loader,
-        //     options: {
-        //         hmr: isDev,
-        //         reloadAll: true,
-        //     },
-        // },
-        'vue-style-loader',
+        {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+                hmr: isDev,
+                reloadAll: true,
+            },
+        },
         'css-loader',
     ]
     if (extra) {
@@ -32,7 +31,7 @@ const cssLoaders = (extra) => {
     return loaders
 }
 
-const babelOptions = (preset) => {
+const babelOptions = preset => {
     const options = {
         presets: ['@babel/preset-env'],
         plugins: ['@babel/plugin-proposal-class-properties'],
@@ -62,38 +61,45 @@ const optimization = () => {
         },
     }
     if (isProd) {
-        config.minimizer = [new OptimizeCssAssetsPlugin(), new TerserPlugin()]
+        config.minimizer = [
+            new OptimizeCssAssetsPlugin(),
+            new TerserPlugin({ cache: true, parallel: true }),
+        ]
     }
     return config
 }
 
 const plugins = () => {
     base = [
+        new MiniCssExtractPlugin({
+            // prepend folder name
+            filename: 'style/' + filename('css'),
+            chunkFilename: 'style/' + filename('css'),
+            ignoreOrder: false,
+        }),
         new HTMLWebpackPlugin({
             //auto add tags with src
             template: './index.html',
+            favicon: path.resolve(__dirname, 'src', 'favicon.ico'),
             minify: {
                 collapseWhitespace: isProd,
             },
         }),
         new CleanWebpackPlugin(), //clean dist folder
-        new CopyWebpackPlugin({
-            patterns: [
-                {
-                    from: path.resolve(__dirname, 'src/favicon.ico'),
-                    to: path.resolve(__dirname, 'dist'),
-                },
-            ],
-        }),
-        new MiniCssExtractPlugin({
-            filename: filename('css'),
-        }),
+        // new CopyWebpackPlugin({
+        //     patterns: [
+        //         {
+        //             from: path.resolve(__dirname, 'src/favicon.ico'),
+        //             to: path.resolve(__dirname, 'dist'),
+        //         },
+        //     ],
+        // }),
         new VueLoaderPlugin(),
     ]
     // on that when analizer needed after each build
-    // if (isProd) {
-    //     base.push(new BundleAnalyzerPlugin())
-    // }
+    if (isProd) {
+        base.push(new BundleAnalyzerPlugin())
+    }
     return base
 }
 
@@ -105,7 +111,8 @@ module.exports = {
         anal: './anal.ts',
     },
     output: {
-        filename: filename('js'),
+        filename: './js/' + filename('js'),
+        chunkFilename: './js/' + filename('js'),
         path: path.resolve(__dirname, 'dist'),
     },
     resolve: {
@@ -135,12 +142,27 @@ module.exports = {
                 use: cssLoaders('sass-loader'),
             },
             {
-                test: /\.(png|svg|jpeg)$/,
-                use: ['file-loader'],
+                test: /\.(png|svg|jpe?g|gif)$/,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: 'img/[name].[hash:6].[ext]', //might be a problem like with fonts | closed
+                            publicPath: '../',
+                            esModule: false,
+                        },
+                    },
+                ],
             },
             {
-                test: /\.(ttf|woff)$/,
-                use: ['file-loader'],
+                test: /\.(ttf|woff|woff2)$/,
+                use: {
+                    loader: 'file-loader',
+                    options: {
+                        name: 'fonts/[name].[hash:6].[ext]',
+                        publicPath: '../',
+                    },
+                },
             },
             {
                 test: /\.js$/,
